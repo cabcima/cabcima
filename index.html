@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>findImg</title>
+    <link rel="icon" type="image/x-icon" href="/img/logo_app.png">
+</head>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<style>
+    body {
+        margin: auto;
+    }
+
+    #container {
+        width: 330px;
+        margin: auto;
+    }
+
+    div {
+        padding: 4px 2px 2px 2px;
+        border-radius: 6px;
+    }
+
+    span,
+    header {
+        margin: auto;
+        font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+        font-size: 12pt;
+        font-weight: 800;
+    }
+
+    footer,
+    header {
+        padding: 4px 2px 2px 2px;
+        border: #ad0000 1px solid;
+        height: 20px;
+        background: #ad0000;
+        color: white;
+        border-radius: 6px;
+    }
+
+    #footerspan {
+        font-style: oblique;
+        font-size: 10pt;
+        font-weight: 300;
+    }
+
+li{
+    list-style-type:none;
+    cursor: pointer;
+    
+    padding: 2px 2px 2px 8px;
+}
+li:hover{
+    background-color: #ad0000;
+    color: white;
+    border-radius: 4px;
+    
+}
+
+
+</style>
+</style>
+
+<body>
+    <div id="container">
+        <header>
+            <img src="/img/logo_app.png" width="15" height="15">
+            <span>CabCima</span>
+        </header>
+        <div style="border: #ad0000 1px solid;">
+            <li onclick="openbarcode()">findImg</li>
+            <div>
+            </div>
+            <div style="display:flex;">
+            </div>
+            <div>
+            </div>
+            <div style="display:flex;">
+            </div>
+            <div>
+            </div>
+            <div style="display:flex;">
+            </div>
+        </div>
+        <footer>
+            <span id="footerspan">Autor&#169: cabcima@gmail.com</span>
+        </footer>
+    </div>
+    <span id="info"></span>
+</body>
+
+</html>
+<script>
+    function openbarcode() {
+        let om = window.open("barcode.html", "_self");
+    }
+</script>

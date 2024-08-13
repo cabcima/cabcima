@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>findImg</title>
+  <link rel="icon" type="image/x-icon" href="/img/logo_app.png">
+</head>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<style>
+  body {
+    margin: auto;
+  }
+
+  #container {
+    width: 330px;
+    margin: auto;
+  }
+
+  div {
+    padding: 4px 2px 2px 2px;
+    border-radius: 6px;
+  }
+
+  span,
+  header {
+    margin: auto;
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    font-size: 12pt;
+    font-weight: 800;
+  }
+
+  footer,
+  header {
+    padding: 4px 2px 2px 2px;
+    border: #ad0000 1px solid;
+    height: 20px;
+    background: #ad0000;
+    color: white;
+    border-radius: 6px;
+  }
+
+  #footerspan {
+    font-style: oblique;
+    font-size: 10pt;
+    font-weight: 300;
+  }
+
+  input {
+    display: block;
+    margin: auto;
+    text-align: center;
+    border-radius: 20px;
+  }
+
+  #btn,
+  #btn_ler_ean {
+    width: 150px;
+    border: #000000 2px solid;
+    background-color: #ad0000;
+    color: rgb(255, 255, 255);
+    font-family: 'Arial Narrow Bold';
+    font-weight: 600;
+    font-size: 16pt;
+  }
+
+  #ean {
+    width: 180px;
+  }
+
+  #sirius {
+    width: 125px;
+  }
+
+  #ean,
+  #sirius {
+    border: #000000 2px solid;
+    color: rgb(0, 0, 0);
+    font-family: 'Arial Narrow Bold';
+    font-weight: 600;
+    font-size: 14pt;
+  }
+
+  /* Retirar a setas do input=number Chrome, Safari, Edge, Opera*/
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  /* Firefox */
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+img{
+  cursor: pointer;
+}
+
+</style>
+</style>
+
+<body>
+  <div id="container">
+
+    <header>
+      <img src="/img/logo_app.png" width="15" height="15" onclick="home()">
+      <span>findImg</span>
+    </header>
+
+    <div style="width: 330px;height: 10%; display: none; margin: 0px;" id="reader">
+    </div>
+    <div style="border: #ad0000 1px solid;">
+      <div>
+        <input id="btn_ler_ean" type="button" value="LER EAN" onclick="openscan()">
+      </div>
+      <div style="display:flex;">
+        <span>Ean:</span>
+      </div>
+      <div>
+        <input type="number" id="ean">
+      </div>
+      <div style="display:flex;">
+        <span>Sirius:</span>
+      </div>
+      <div>
+        <input type="number" id="sirius">
+      </div>
+      <div style="display:flex;">
+        <div style="width:50%;">
+          <input id="btn" type="button" value="AUCHAN" onclick="openauchan()">
+        </div>
+        <div style="width:50%;">
+          <input id="btn" type="button" value="GOOGLE" onclick="opengoogle()">
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <span id="footerspan">Autor&#169: cabcima@gmail.com</span>
+    </footer>
+  </div>
+  <span id="info"></span>
+</body>
+
+</html>
+<script>
+  function home() {
+    let om = window.open("index.html", "_self");
+  }
+  function openauchan() {
+    //https://www.auchan.pt/pt/bebidas-e-garrafeira/refrigerantes/refrigerantes-lima-limao/refrigerante-7up-com-gas-free-1.25l/2795939.html    
+    //class="auc-noresults__error"
+
+    let temp = "";
+    let ean = document.getElementById("ean");
+    let sirius = document.getElementById("sirius").value;
+    if (sirius === "") {
+      temp = ean.value;
+    } else {
+      ean.value = "";
+      temp = sirius;
+    }
+
+    // const requestOptions = {
+    //         method: "GET",
+    //         mode: "no-cors",
+    //         //headers: { "Content-Type": "application/json" },
+    //        // body: JSON.stringify(this.tutorial)
+    //     } 
+
+    //    fetch("https://www.auchan.pt/pt/pesquisa?q=" + temp , requestOptions);
+    //   .then(function (response) {
+    //     console.log(response);
+    //   })
+    //   .then(function (json) {
+    //     console.log(json);
+    //   });
+    let om = window.open("https://www.auchan.pt/pt/pesquisa?q=" + temp, "_blank");
+    om.focus();
+  }
+  function opengoogle() {
+    //https://www.google.com/search?igu=1&gws_rd=ssl&q=  &tbm=isch&ved=2ahUKEwien-D_wez2AhXz6OAKHXjaA-MQ2-cCegQIABAA&oq=
+    let temp = "";
+    let ean = document.getElementById("ean");
+    let sirius = document.getElementById("sirius").value;
+    if (sirius === "") {
+      temp = ean.value;
+    } else {
+      ean.value = "";
+      temp = sirius;
+    }
+    let om = window.open("https://www.google.com/search?igu=1&gws_rd=ssl&q=" + temp + "&tbm=isch&ved=2ahUKEwien-D_wez2AhXz6OAKHXjaA-MQ2-cCegQIABAA&oq=" + temp, "_blank");
+    om.focus();
+  }
+  function openscan() {
+    let div_display = document.getElementById("reader");
+    div_display.style.display = "block";
+    document.getElementById("btn_ler_ean").style.display = "none";
+    console.log(html5QrcodeScanner.html5Qrcode.getState());
+    console.log(html5QrcodeScanner.html5Qrcode.isScanning);
+    // document.getElementById("info").innerHTML="html5Qrcode.getState(): "+html5QrcodeScanner.html5Qrcode.getState()+" html5Qrcode.isScanning: "+html5QrcodeScanner.html5Qrcode.isScanning;
+    if (html5QrcodeScanner.html5Qrcode.isScanning && html5QrcodeScanner.html5Qrcode.getState() === 3) {
+      html5QrcodeScanner.html5Qrcode.resume();
+    }
+  }
+  function onScanSuccess(decodedText, decodedResult) {
+    //'ean_13'>9,'ean_8','qr_code'>0,
+    // Handle on success condition with the decoded text or result.
+    console.log("Scan format:" + decodedResult.result.format.format);
+    console.log("Scan formatName:" + decodedResult.result.format.formatName);
+    // this will stop the scanner (video feed) and clear the scan area.
+    //html5QrcodeScanner.clear();
+    if (decodedResult.result.format.format === 9) {
+      let ean = document.getElementById("ean");
+      let sirius = document.getElementById("sirius");
+      let div_display = document.getElementById("reader");
+      sirius.value = "";
+      ean.value = decodedText;
+      div_display.style.display = "none";
+      document.getElementById("btn_ler_ean").style.display = "block";
+      html5QrcodeScanner.html5Qrcode.pause();
+      let om = window.open("https://www.auchan.pt/pt/pesquisa?q=" + decodedText, "_blank");
+      om.focus();
+
+    }
+  }
+
+  function onScanError(errorMessage) {
+    // handle on error condition, with error message
+  }
+  var cameraId;
+  Html5Qrcode.getCameras().then(devices => {
+    /**
+     * devices would be an array of objects of type:
+     * { id: "id", label: "label" }
+     */
+    if (devices && devices.length) {
+      let i = 0;
+      while (i < devices.length) {
+        cameraId = devices[i].id;
+        if (devices[i].label.includes("back")) {
+          i = devices.length;
+          exit;
+        }
+        console.log(devices[i].label);
+        i++;
+      }
+
+      console.log(cameraId);
+
+    }
+  }).catch(err => {
+    console.log(err);
+  });
+
+  var html5QrcodeScanner = new Html5QrcodeScanner("reader", {
+    cameraId,
+    fps: 10,
+    qrbox: {
+      width: 220,
+      height: 150,
+    },
+  });
+  html5QrcodeScanner.render(onScanSuccess, onScanError);
+</script>
