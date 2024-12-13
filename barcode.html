@@ -175,7 +175,7 @@ img{
     //   .then(function (json) {
     //     console.log(json);
     //   });
-    let om = window.open("https://www.auchan.pt/pt/pesquisa?q=" + temp, "_blank");
+    let om = window.open("https://www.auchan.pt/pt/pesquisa?q=" + temp, "_self");
     om.focus();
   }
   function opengoogle() {
@@ -189,7 +189,7 @@ img{
       ean.value = "";
       temp = sirius;
     }
-    let om = window.open("https://www.google.com/search?igu=1&gws_rd=ssl&q=" + temp + "&tbm=isch&ved=2ahUKEwien-D_wez2AhXz6OAKHXjaA-MQ2-cCegQIABAA&oq=" + temp, "_blank");
+    let om = window.open("https://www.google.com/search?igu=1&gws_rd=ssl&q=" + temp + "&tbm=isch&ved=2ahUKEwien-D_wez2AhXz6OAKHXjaA-MQ2-cCegQIABAA&oq=" + temp, "_self");
     om.focus();
   }
   function openscan() {
