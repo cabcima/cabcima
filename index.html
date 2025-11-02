@@ -71,7 +71,8 @@ li:hover{
             <span>CabCima</span>
         </header>
         <div style="border: #ad0000 1px solid;">
-            <li onclick="openbarcode()">findImg</li>
+            <li onclick="openBarcode()">findImg</li>
+            <li onclick="openDespiking_v2()">Despiking</li>
             <div>
             </div>
             <div style="display:flex;">
@@ -94,7 +95,10 @@ li:hover{
 
 </html>
 <script>
-    function openbarcode() {
+    function openBarcode() {
         let om = window.open("barcode", "_self");
+    }
+    function openDespiking_v2() {
+        let om = window.open("despiking_v2", "_self");
     }
 </script>
