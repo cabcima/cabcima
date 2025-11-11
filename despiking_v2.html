@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Despiking</title>
+  <link rel="icon" type="image/x-icon" href="https://cabcima.github.io/cabcima/img/logo_app.png">
+  <style>
+    body {
+      font-family: Arial;
+      padding: 2px;
+    }
+
+    input,
+    select,
+    button {
+      margin: 5px;
+    }
+
+    button {
+      width: 70px;
+      height: 20px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    h3 {
+      background-color: #0077cc;
+      color: white;
+    }
+
+    .tab {
+      margin-top: 10px;
+    }
+
+    .tablinks {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 2px 2px;
+      cursor: pointer;
+      margin: 0 1px;
+      border-radius: 8px 8px 0 0;
+      transition: background-color 0.3s ease;
+      display: inline;
+      align-items: center;
+      gap: 8px;
+      width: 100px;
+    }
+
+    .active {
+      background-color: #0077cc;
+      color: white;
+      border-color: #0077cc;
+    }
+
+    #qtd_palete td {
+      width: 80px;
+    }
+
+    .btn_inc_menos,
+    .btn_inc_mais {
+      width: 25px;
+    }
+
+    .btn_inc_menos {
+      color: #ffffff;
+      background-color: red;
+    }
+
+    .btn_inc_mais {
+      color: #ffffff;
+      background-color: darkgreen;
+    }
+
+    input {
+      width: 50px;
+    }
+
+    .resultado {
+      overflow-y: scroll;
+      height: 500px;
+    }
+
+    .tabcontent {
+      height: 550px;
+    }
+
+    table {
+      margin-top: 5px;
+      border-collapse: collapse;
+    }
+
+    #qtd_palete tr:nth-child(even) {
+      background-color: #d3d3d3;
+    }
+
+    .colsum {
+      width: 5%;
+    }
+
+    th,
+    td {
+      border: 1px solid #000000;
+      padding: 1px;
+      text-align: center;
+    }
+
+    /* Estilo do modal */
+    #meuModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .conteudoModal {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    input[type="time"] {
+      font-size: 16px;
+      padding: 5px;
+      width: 80px;
+      border-radius: 8px;
+    }
+
+    footer {
+      background-color: #0077cc;
+      color: white;
+      text-align: center;
+      padding: 5px;
+      font-size: 14px;
+    }
+
+    .spinner {
+      border: 3px solid #014775;
+      border-top: 3px solid #00ffff;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.7s linear infinite;
+      display: none;
+      margin: 20px auto;
+      position: fixed;
+      /* ou absolute, dependendo do contexto */
+      top: 55px;
+      right: 30px;
+      z-index: 9999;
+      /* garante que fique acima de outros elementos */
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="loader" class="spinner"></div>
+  <h2>Despiking dia: <span id="dataHoje"></span></h2>
+
+  <div class="tab">
+    <button class="tablinks" id="btn_tab" onclick="openTab(event, 'Tab1')">Despiking</button>
+    <button class="tablinks" id="btn_tab" onclick="openTab(event, 'Tab2')">Tempos</button>
+    <button class="tablinks" id="btn_tab" onclick="openTab(event, 'Tab3')">Paletes</button>
+  </div>
+
+  <div id="Tab1" class="tabcontent">
+    <h3>Info despiking</h3>
+    <div class="resultado">
+      <table id="total">
+        <tr>
+          <td style="background-color: #0077cc; color: white; text-align: left;">Dia:</td>
+          <td>
+            <select id="dia">
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td style="background-color: #0077cc; color: white; text-align: left;">Tempo (Min):</td>
+          <td><span id="tt_">---</span></td>
+        </tr>
+        <tr>
+          <td style="background-color: #0077cc; color: white; text-align: left;">Nº Paletes:</td>
+          <td><span id="pt_">--</span></td>
+        </tr>
+        <tr>
+          <td style="background-color: #0077cc; color: white; text-align: left;">Terminou (Horas):</td>
+          <td><span id="ht_">--:--</span></td>
+        </tr>
+        <tr>
+          <td><button id="fdpk_" onclick="terminar_dpk();">Terminar</button></td>
+          <td><button id="edpk_" onclick="apagar_dpk();">Apagar</button></td>
+        </tr>
+        <tr>
+          <td colspan="2" style="background-color: #0077cc; color: white; text-align: left;">Enviar</td>
+        </tr>
+        <tr>
+          <td>Agendar<input onclick="agendar_envio_dpk();" id="agendardpk_" type="checkbox"></td>
+          <td><button id="adpk_" onclick="enviar_dpk();">Enviar</button></td>
+        </tr>
+        <tr>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div id="Tab2" class="tabcontent">
+    <h3>Tempo por operador</h3>
+    <div class="resultado">
+      <button onclick="adicionarNome()">Novo</button>
+      <label>Nome:</label>
+      <select id="nomeSelect">
+        <option value="" selected>-- Escolher --</option>
+      </select>
+      <table id="resultados">
+        <tbody></tbody>
+      </table>
+      <div id="meuModal">
+        <div class="conteudoModal">
+          <h3>Escolha uma hora (hh:mm)</h3>
+          <input type="time" id="horaInput">
+          <br><br>
+          <button onclick="confirmarHora()">Confirmar</button>
+          <button onclick="fecharModal()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="Tab3" class="tabcontent">
+    <h3>Quantidade de Paletes</h3>
+    <div class="resultado">
+      <table id="qtd_palete">
+        <thead style="position: sticky; top: 0; background-color: #0077cc; color: white;">
+          <th>Categoria</th>
+          <th class="colsum">&sum;</th>
+          <th>Simples</th>
+          <th>Média</th>
+          <th>Difícil</th>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+  <footer>
+    &copy; 2025 cabcima@gmail.com - Todos os direitos reservados
+  </footer>
+  <input type="time" id="h_inicio" style="visibility:hidden;" />
+  <input type="time" id="h_pausa" style="visibility:hidden;" />
+  <input type="time" id="h_fim" style="visibility:hidden;" />
+  <input type="time" id="h_fim_dpk" style="visibility:hidden;" />
+
+  <script>
+    const url = "https://script.google.com/macros/s/AKfycbwElDPgvw63tMkUWvbIj_a1Ssycc00tCHFBTK3V2zR2oMOXWIlzEpOVMIoiSnuazveMCw/exec?"
+    var nomes = [];
+    var categ = [];
+    var resultados = [];
+    var idSel = 0
+    var id = -1
+    var id_dpk = -1
+    var dpk = { "id": "id_temp", "data": dataHojeFormatada(), "npal": "", "tempo": "", "np": "", "enviar": "TRUE", "hfim": "--:--", "pal": [], "oper": [] }
+
+
+    async function enviar_dados(op, c, v) {
+      showLoader();
+
+      console.log(url + "op=" + op + "&id=" + dpk.id + "&cmd=" + c + "&v=" + v)
+      //    if(c==="oper"){
+      //    alert("op=v2upd&id=" + dpk.id + "&cmd=" + c + "&v=" + v)
+      //   }
+      const data = await fetch(url + "op=" + op + "&id=" + dpk.id + "&cmd=" + c + "&v=" + v)
+        .then(response => response.json())
+        .then(data => {
+          if (data.cmd === "dpk") {
+            console.log(data.id)
+          } else if (data.cmd === "pal") {
+            console.log(data.id)
+          } else if (data.cmd === "oper") {
+            console.log(data.id)
+          } else if (data.cmd === "env") {
+            console.log(data.id)
+          }
+
+          /*      nomes = data.pessoas
+                categ = data.categ
+                resultados = data.dpk
+                document.getElementById("tt_").id = "tt_" + dpk.id
+                document.getElementById("pt_").id = "pt_" + dpk.id
+                document.getElementById("ht_").id = "ht_" + dpk.id
+                document.getElementById("fdpk_").id = "fdpk_" + dpk.id
+                document.getElementById("agendardpk_").id = "agendardpk_" + dpk.id
+                document.getElementById("adpk_").id = "adpk_" + dpk.id
+                document.getElementById("dataHoje").textContent = dpk.data
+                document.getElementById("tt_" + dpk.id).innerHTML = dpk.tempo
+                document.getElementById("pt_" + dpk.id).innerHTML = dpk.npal
+                document.getElementById("ht_" + dpk.id).innerHTML = dpk.hfim
+      
+                console.log(nomes);
+                if (compararData()) {
+                  atualizarTabela();
+                }
+                nomes.forEach((n) => {
+                  const select = document.getElementById("nomeSelect");
+                  const option = document.createElement("option");
+                  option.value = n[0];
+                  option.textContent = n[1];
+                  select.appendChild(option);
+                });
+                info_dpk()
+                paletes_dpk(0)*/
+          hideLoader();
+
+        });
+
+    }
+
+    function showLoader() {
+      document.getElementById("loader").style.display = "block";
+    }
+
+    function hideLoader() {
+      document.getElementById("loader").style.display = "none";
+    }
+
+    function agendar_envio_dpk() {
+      const ag = document.getElementById("agendardpk_" + dpk.id);
+      dpk.enviar = ag.checked
+      //  alert(ag.checked)
+      enviar_dados("v2upd", "dpk", JSON.stringify([dpk.id, dpk.data, dpk.npal, dpk.tempo, dpk.np, dpk.enviar, dpk.hfim]))
+    }
+
+    function enviar_dpk() {
+      enviar_dados("v2env", "env", JSON.stringify([dpk.id, dpk.data, dpk.npal, dpk.tempo, dpk.np, dpk.enviar, dpk.hfim]))
+    }
+
+    function terminar_dpk() {
+    }
+
+    const selectDpk = document.getElementById("dia");
+    selectDpk.addEventListener("change", function () {
+      const nome = this.value;
+      console.log(dpk)
+      const temp = dpk.id
+      dpk.oper.forEach((r, idx) => {
+        document.getElementById(r[0]).hidden = false
+      })
+      document.getElementById("nomeSelect").selectedIndex = 0;
+      dpk = resultados[this.value]
+      document.getElementById("tt_" + temp).id = "tt_" + dpk.id
+      document.getElementById("pt_" + temp).id = "pt_" + dpk.id
+      document.getElementById("ht_" + temp).id = "ht_" + dpk.id
+      document.getElementById("fdpk_" + temp).id = "fdpk_" + dpk.id
+      document.getElementById("agendardpk_" + temp).id = "agendardpk_" + dpk.id
+      document.getElementById("adpk_" + temp).id = "adpk_" + dpk.id
+      document.getElementById("dataHoje").textContent = dpk.data
+      document.getElementById("tt_" + dpk.id).innerHTML = dpk.tempo
+      document.getElementById("pt_" + dpk.id).innerHTML = dpk.npal
+      document.getElementById("ht_" + dpk.id).innerHTML = dpk.hfim
+      document.getElementById("agendardpk_" + dpk.id).checked = dpk.enviar
+
+      paletes_dpk(1)
+      //       info_dpk()
+      atualizarTabela()
+      //  alert("Você selecionou: " + nome);
+    });
+
+
+    function info_dpk() {
+      const select = document.getElementById("dia");
+      select.innerHTML = ""
+      const option1 = document.createElement("option");
+      option1.value = "";
+      option1.textContent = "-- Escolher --";
+      select.appendChild(option1);
+      resultados.forEach((n, i) => {
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = n.data;
+        if (dpk.id === n.id) {
+          option.selected = true;
+          document.getElementById("dataHoje").innerHTML = dpk.data
+        }
+        select.appendChild(option);
+      });
+    }
+
+    function inc_palete(merc, cat, dif, sinal) {
+      console.log(dpk.pal)
+      let i = dpk.pal.reduce((acc, valor, index) => {
+        if (valor.id == merc && valor.id_c == cat) {
+          acc.push(index);
+        }
+        return acc;
+      }, []);
+      //  findIndex(v => v.id == merc && v.id_c == cat)
+      console.log(i + " <> " + merc + " <> " + cat)
+      //    alert(dpk.pal[i].cat[dif])
+      if (i.length < 1) {
+        let d = ["0", "0", "0"]
+        sinal === "+" ? d[dif] = 1 : d[dif] = "0"
+        dpk.pal.push({ "id": merc, "cat": d })
+        i = dpk.pal.length - 1
+      } else {
+        //     alert("> " + dpk.pal[i].cat)
+        if (sinal === "-" && dpk.pal[i].cat[dif] > 0) {
+          dpk.pal[i].cat[dif] = Number(dpk.pal[i].cat[dif]) - 1
+        } else if (sinal === "+") {
+          dpk.pal[i].cat[dif] = Number(dpk.pal[i].cat[dif]) + 1
+        }
+      }
+      // alert(dpk.pal[i].cat[0]+ " <> " + dpk.pal[i].cat[1] + " <> " + dpk.pal[i].cat[2])
+      document.getElementById("tpal_" + merc + "_" + cat + "_" + dif).innerHTML = dpk.pal[i].cat[dif]
+      document.getElementById("somapal_" + merc + "_" + cat).innerHTML = Number(dpk.pal[i].cat[2]) + Number(dpk.pal[i].cat[1]) + Number(dpk.pal[i].cat[0])
+      enviar_dados("v2upd", "pal", JSON.stringify(dpk.pal))
+      calculo_total_paletes()
+    }
+
+    function calculo_total_paletes() {
+      let total = 0
+      dpk.pal.forEach((x) => {
+        total = total + Number(x.cat[0]) + Number(x.cat[1]) + Number(x.cat[2])
+        console.log(x)
+      })
+      dpk.npal = total
+      document.getElementById("pt_" + dpk.id).innerHTML = dpk.npal
+      enviar_dados("v2upd", "dpk", JSON.stringify([dpk.id, dpk.data, dpk.npal, dpk.tempo, dpk.np, dpk.enviar, dpk.hfim]))
+    }
+
+    function paletes_dpk(op) {
+      const tbody = document.querySelector("#qtd_palete tbody");
+      tbody.innerHTML = "";
+      //console.log(dpk)
+      const c = categ.filter(x => x[0] != "")
+      c.forEach((r, idx) => {
+        if (idx < c.length) {
+          let fmd = ["0", "0", "0"]
+          if (dpk.pal.length > 0) {
+            //     console.log(r[0] + " <<>>: " + r[1])
+            const tmp = dpk.pal.filter(x => x.id === r[1] && x.id_c === r[0])
+            //       console.log(">>>>: " + tmp.length)
+            fmd = [tmp[0].cat[0], tmp[0].cat[1], tmp[0].cat[2]]
+          }
+          // console.log("bolas1> "+dpk.pal.id)
+          // console.log(r)
+          const row = document.createElement("tr");
+          // <td>${r.data}</td>
+          //    console.log(r[idx])
+          row.innerHTML = `
+        <td  style="text-align: left;">${r[2]}</td>
+         <td><span id="somapal_${r[1]}_${r[0]}">${(Number(fmd[0]) + Number(fmd[1]) + Number(fmd[2]))}</span></td>
+       <td><button class="btn_inc_menos" id="menos_${r[1]}_${r[0]}_0" onclick="inc_palete(${r[1]},${r[0]},0,'-')">-</button><span id="tpal_${r[1]}_${r[0]}_0">${fmd[0]}</span><button class="btn_inc_mais" id="mais_${r[1]}_${r[0]}_0" onclick="inc_palete(${r[1]},${r[0]},0,'+')">+</button></td>
+        <td><button class="btn_inc_menos" id="menos_${r[1]}_${r[0]}_1" onclick="inc_palete(${r[1]},${r[0]},1,'-')">-</button><span id="tpal_${r[1]}_${r[0]}_1">${fmd[1]}</span><button class="btn_inc_mais" id="mais_${r[1]}_${r[0]}_1" onclick="inc_palete(${r[1]},${r[0]},1,'+')">+</button></td>
+        <td><button class="btn_inc_menos" id="menos_${r[1]}_${r[0]}_2" onclick="inc_palete(${r[1]},${r[0]},2,'-')">-</button><span id="tpal_${r[1]}_${r[0]}_2">${fmd[2]}</span><button class="btn_inc_mais" id="mais_${r[1]}_${r[0]}_2" onclick="inc_palete(${r[1]},${r[0]},2,'+')">+</button></td>
+        `;
+          tbody.appendChild(row);
+        }
+      });
+    }
+
+    // Simula uma operação assíncrona
+    showLoader();
+    /*setTimeout(() => {
+       hideLoader();
+       alert("Resultados carregados!");
+     }, 3000);
+     /*
+     const loader = document.getElementById("loader");
+     
+     const animation = loader.animate([
+       { transform: 'rotate(0deg)' },
+       { transform: 'rotate(360deg)' }
+     ], {
+       duration: 1000,
+       iterations: Infinity
+     });
+     */
+    //  showLoader();
+    fetch(url + "op=v2desp")
+      .then(response => response.json())
+      .then(data => {
+        nomes = data.pessoas
+        nomes.forEach((n) => {
+          const select = document.getElementById("nomeSelect");
+          const option = document.createElement("option");
+          option.value = n[0];
+          option.id = n[0];
+          option.textContent = n[1];
+          select.appendChild(option);
+        });
+        categ = data.categ
+        resultados = data.dpk
+        console.log(nomes);
+        if (compararData()) {
+          atualizarTabela();
+        }
+        info_dpk()
+        paletes_dpk(0)
+        document.getElementById("tt_").id = "tt_" + dpk.id
+        document.getElementById("pt_").id = "pt_" + dpk.id
+        document.getElementById("ht_").id = "ht_" + dpk.id
+        document.getElementById("fdpk_").id = "fdpk_" + dpk.id
+        document.getElementById("agendardpk_").id = "agendardpk_" + dpk.id
+        document.getElementById("adpk_").id = "adpk_" + dpk.id
+        document.getElementById("dataHoje").textContent = dpk.data
+        document.getElementById("tt_" + dpk.id).innerHTML = dpk.tempo
+        document.getElementById("pt_" + dpk.id).innerHTML = dpk.npal
+        document.getElementById("ht_" + dpk.id).innerHTML = dpk.hfim
+        document.getElementById("agendardpk_" + dpk.id).checked = dpk.enviar
+        hideLoader();
+      });
+
+    function openTab(evt, tabName) {
+      const tabcontent = document.querySelectorAll(".tabcontent");
+      tabcontent.forEach(el => {
+        if (el.style.display === "block" && el.id === "Tab3") {
+          enviar_dados("v2upd", "pal", JSON.stringify(dpk.pal))
+          calculo_total_paletes()
+        }
+        //        console.log(el.style.display)
+        el.style.display = "none"
+      });
+
+      const tablinks = document.querySelectorAll(".tablinks");
+      tablinks.forEach(el => el.classList.remove("active"));
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.classList.add("active");
+    }
+
+    // Abre a primeira aba por padrão
+    document.querySelector(".tablinks").click();
+
+    function novoNome(n) {
+      const nome = n
+      let temp = [dpk.id, n, 0, 0, 0, 0, 0]
+      // console.log(n)
+      dpk.oper.push(temp)
+      /*     if (dpk.id == "id_temp") {
+             enviar_dados("dpk", [dpk.id, dpk.data, dpk.npal, dpk.tempo, dpk.np, dpk.enviar, dpk.hfim])
+           }*/
+      enviar_dados("v2upd", "oper", JSON.stringify(temp))
+      temp.shift(dpk.id)
+      console.log("novoNome: " + dpk.oper)
+      /*if (!compararData()) {
+        dpk.oper.push([n, 0, 0, 0, 0, 0])
+        if (dpk.id === "") {
+          dpk.id = "id_temp"
+          document.getElementById("tt_").id = "tt_" + dpk.id
+          document.getElementById("pt_").id = "pt_" + dpk.id
+          document.getElementById("ht_").id = "ht_" + dpk.id
+          document.getElementById("fdpk_").id = "fdpk_" + dpk.id
+          document.getElementById("agendardpk_").id = "agendardpk_" + dpk.id
+          document.getElementById("adpk_").id = "adpk_" + dpk.id
+        }
+      }*/
+      //  enviar_dados("v2upd", "oper",dpk.oper)
+      atualizarTabela();
+    }
+
+    function compararData() {
+      let flag = false
+      let i = 0
+      while (i < resultados.length && !flag) {
+        console.log(resultados[i].data + " <fdsf> " + dataHojeFormatada())
+        if (resultados[i].data === dataHojeFormatada()) {
+          dpk = resultados[i]
+          flag = true
+        }
+        i++
+      }
+      if (!flag || dpk.pal.length == 0) {
+        categ.forEach(element => {
+          dpk.pal.push({ "id": element[1], "id_c": element[0], "cat": ["0", "0", "0"] })
+        });
+        console.log(categ)
+        //dpk.pal.push(categ)
+        resultados.push(dpk)
+        if (dpk.id == "id_temp") {
+          console.log(Number(resultados.reduce((max, desp) => desp.id > max && desp.id != "id_temp" ? desp.id : max, 0)) + 1)
+          dpk.id = Number(resultados.reduce((max, desp) => desp.id > max && desp.id != "id_temp" ? desp.id : max, 0)) + 1
+          enviar_dados("v2upd", "dpk", JSON.stringify([dpk.id, dpk.data, dpk.npal, dpk.tempo, dpk.np, dpk.enviar, dpk.hfim]))
+        }
+        enviar_dados("v2upd", "pal", JSON.stringify(dpk.pal))
+        info_dpk()
+      }
+      return flag
+    }
+
+    const selectNome = document.getElementById("nomeSelect");
+    selectNome.addEventListener("change", function () {
+      const nome = this.value;
+      //      console.log("changenome: "+nome)
+      novoNome(nome)
+      openTab(event, 'Tab2')
+      //  alert("Você selecionou: " + nome);
+    });
+
+    const h_inicio = document.getElementById("h_inicio");
+    h_inicio.addEventListener("change", function () {
+      let i = 0
+      while (i < dpk.oper.length && dpk.oper[i][0] != id) { i++ }
+      if (converterParaMinutos(this.value) < converterParaMinutos(dpk.oper[i][4]) || dpk.oper[i][4] == 0) {
+        //      alert(i);
+        dpk.oper[i][1] = this.value
+        //      alert(dpk.oper[i][1]);
+        document.getElementById("i_" + id).innerHTML = dpk.oper[i][1]
+        dpk.oper[i].unshift(dpk.id)
+        enviar_dados("v2upd", "oper", JSON.stringify(dpk.oper[i]))
+        dpk.oper[i].shift()
+      } else {
+        alert("Data de início do despiking tem de ser inferior à data de fim...")
+      }
+      h_inicio.value = 0
+    });
+
+    const h_pausa = document.getElementById("h_pausa");
+    h_pausa.addEventListener("change", function () {
+      let i = 0
+      let flag = true
+      while (i < dpk.oper.length && dpk.oper[i][0] != id) { i++ }
+      // alert(">> "+i);
+      if (dpk.oper[i][1] == 0) {
+        alert("1- Ainda não existe hora de início de despiking...")
+        flag = !flag
+      } else {
+      //  alert(dpk.oper[i][2])
+        if (dpk.oper[i][2] == 0 || dpk.oper[i][2] === "") {
+          if (converterParaMinutos(this.value) < converterParaMinutos(dpk.oper[i][1])) {
+            alert("2 - Hora de início da pausa tem de ser superior à hora de início do despiking...")
+            flag = !flag
+          } else if (converterParaMinutos(this.value) > converterParaMinutos(dpk.oper[i][4]) && dpk.oper[i][4] != 0) {
+            alert("3 - Hora de início da pausa tem de ser inferior à hora de fim do despiking...")
+            flag = !flag
+          }
+        } else {
+          if (converterParaMinutos(this.value) < converterParaMinutos(dpk.oper[i][2]) ) {
+            alert("4 - A hora de fim da pausa tem de ser superior à hora de início da pausa...")
+            flag = !flag
+          } else if (converterParaMinutos(this.value) > converterParaMinutos(dpk.oper[i][4]) && dpk.oper[i][4] != 0) {
+            alert("5 - A hora de fim da pausa não pode ser superior à hora de fim do despiking...")
+            flag = !flag
+          }
+        }
+      }
+
+
+      if (flag) {
+        if (dpk.oper[i][2] == 0 || dpk.oper[i][2] === "") {
+          dpk.oper[i][2] = this.value
+          //      alert("ccc "+dpk.oper[i][2] )
+          document.getElementById("p_" + id).innerHTML = dpk.oper[i][2]
+        } else {
+          //  alert(">>>> "+dpk.oper[i][2])
+          dpk.oper[i][3] = dpk.oper[i][3] + converterParaMinutos(this.value) - converterParaMinutos(dpk.oper[i][2])
+          document.getElementById("p_" + id).innerHTML = "Pausa"
+          dpk.oper[i][2] = 0
+        }
+        document.getElementById("m_" + id).innerHTML = dpk.oper[i][3]
+        document.getElementById("tmnome_" + id).innerHTML = dpk.oper[i][5] - dpk.oper[i][3]
+        dpk.oper[i].unshift(dpk.id)
+        enviar_dados("v2upd", "oper", JSON.stringify(dpk.oper[i]))
+        dpk.oper[i].shift()
+  //     alert("ok...")
+      }
+      h_pausa.value = 0
+    });
+
+    const h_fim = document.getElementById("h_fim");
+    h_fim.addEventListener("change", function () {
+      let i = 0
+      let idx = 0
+      let terminou = 0
+      while (idx < dpk.oper.length) {
+        //     alert("> " + converterParaMinutos(terminou))
+        if (dpk.oper[idx][0] == id) {
+          i = idx
+          if (converterParaMinutos(terminou) < converterParaMinutos(this.value)) {
+            terminou = this.value
+          }
+        }
+
+        if (dpk.oper[idx][5] != 0 && dpk.oper[idx][0] != i) {
+          if (converterParaMinutos(terminou) < converterParaMinutos(dpk.oper[idx][4])) {
+            terminou = dpk.oper[idx][4]
+          }
+        }
+        idx++
+      }
+      if (converterParaMinutos(this.value) > converterParaMinutos(dpk.oper[i][1])) {
+        dpk.oper[i][4] = this.value
+        if (dpk.oper[i][2] != 0) {
+          dpk.oper[i][3] = dpk.oper[i][3] + converterParaMinutos(dpk.oper[i][4]) - converterParaMinutos(dpk.oper[i][2])
+          document.getElementById("p_" + id).innerHTML = "Pausa"
+          document.getElementById("m_" + id).innerHTML = dpk.oper[i][3]
+          dpk.oper[i][2] = 0
+        }
+        document.getElementById("f_" + id).innerHTML = dpk.oper[i][4]
+        //  alert(dpk.oper[i][5])
+        dpk.tempo = Number(dpk.tempo) - Number(dpk.oper[i][5])
+        dpk.oper[i][5] = Number(converterParaMinutos(dpk.oper[i][4])) - Number(converterParaMinutos(dpk.oper[i][1])) - dpk.oper[i][3]
+        dpk.tempo = Number(dpk.tempo) + dpk.oper[i][5]
+        document.getElementById("tmnome_" + id).innerHTML = dpk.oper[i][5]
+        document.getElementById("tt_" + dpk.id).innerHTML = dpk.tempo
+        dpk.hfim = terminou
+        document.getElementById("ht_" + dpk.id).innerHTML = terminou
+
+        dpk.oper[i].unshift(dpk.id)
+        enviar_dados("v2upd", "oper", JSON.stringify(dpk.oper[i]))
+        //   alert(dpk.oper[i])
+        dpk.oper[i].shift()
+        enviar_dados("v2upd", "dpk", JSON.stringify([dpk.id, dpk.data, dpk.npal, dpk.tempo, dpk.np, dpk.enviar, dpk.hfim]))
+        //   alert(dpk.oper[i])
+      } else {
+        alert("Data de fim do despiking tem de ser superior à data de início...")
+      }
+
+      h_fim.value = 0
+    });
+
+    function abrirModal(op) {
+      idSel = op
+      document.getElementById("meuModal").style.display = "flex";
+    }
+
+    function fecharModal() {
+      idSel = 0
+      document.getElementById("meuModal").style.display = "none";
+    }
+
+    function confirmarHora(op) {
+      const hora = document.getElementById("horaInput").value;
+      if (hora) {
+        resultados[idSel].horasInicio = hora
+        alert("Hora selecionada: " + hora);
+        atualizarTabela();
+        fecharModal();
+      } else {
+        alert("Por favor, selecione uma hora.");
+      }
+    }
+
+    function adicionarNome() {
+      const dado = prompt("Nome:");
+      if (dado !== null && dado.trim() !== "") {
+        //   const nome = document.getElementById("novoNome").value.trim();
+        const nome = dado;
+        if (nome && !nomes.includes(nome)) {
+          nomes.push(nome);
+          const select = document.getElementById("nomeSelect");
+          const option = document.createElement("option");
+          option.value = nome;
+          option.textContent = nome;
+          option.selected = true
+          select.appendChild(option);
+          //    console.log("addnome: "+nome)
+          novoNome(nome)
+          // document.getElementById("novoNome").value = "";
+        }
+        // alert("Olá, " + dado + "!");
+      } //else {
+      //alert("Nenhum dado inserido.");
+      //}
+    }
+
+    /*
+    function adicionarNome() {
+      const nome = document.getElementById("novoNome").value.trim();
+      if (nome && !nomes.includes(nome)) {
+        nomes.push(nome);
+        const select = document.getElementById("nomeSelect");
+        const option = document.createElement("option");
+        option.value = nome;
+        option.textContent = nome;
+        select.appendChild(option);
+        document.getElementById("novoNome").value = "";
+      }
+    }
+*/
+
+    function converterParaMinutos(hora) {
+      if (hora == 0) {
+        return 0
+      } else {
+        const [h, m] = hora.split(":").map(Number);
+        return h * 60 + m;
+      }
+    }
+
+    function atualizarTabela() {
+      const tbody = document.querySelector("#resultados tbody");
+      tbody.innerHTML = "";
+      console.log(dpk.oper)
+      dpk.oper.forEach((r, idx) => {
+        const row = document.createElement("tr");
+        // <td>${r.data}</td>
+        console.log("dpk.oper: " + r)
+
+        row.innerHTML = `
+            <td style="background-color: #0077cc; color: white;">Nome</td>
+            <td colspan="2">${nomes.filter(x => x[0] === r[0])[0][1]}</td>
+           <td style="background-color: #0077cc; color: white;">Tempo</td>
+           <td colspan="2"><span id="tmnome_${r[0]}">${ifIsZero(r[5])}</span></td>
+        `;
+        tbody.appendChild(row);
+        const row1 = document.createElement("tr");
+        row1.innerHTML = `
+         <td style="background-color: #0077cc; color: white;">Início</td>
+        <td><button id="i_${r[0]}" onclick="dataSelect(${r[0]},0);">${ifIsZero(r[1])}</button></td>
+         <td><button id="p_${r[0]}" onclick="dataSelect(${r[0]},1);">${r[1]==0?'Pausa':r[1]}</button></td>
+          <td><span id="m_${r[0]}">${r[3]}</span></td>
+           <td style="background-color: #0077cc; color: white;">Fim</td>
+          <td><button id="f_${r[0]}" onclick="dataSelect(${r[0]},2);">${ifIsZero(r[4])}</button></td>
+        `;
+        tbody.appendChild(row1);
+        document.getElementById(r[0]).hidden = true;
+        document.getElementById("nomeSelect").selectedIndex = 0;
+
+      });
+    }
+
+    function ifIsZero(op) {
+      //   alert(op==0?"--:--":op)
+      if (op.length > 5) {
+        op = op.substring(0, op.length - 3)
+      }
+      return op == 0 ? "--:--" : op
+    }
+
+    function dataSelect(i, op) {//0-início, 1-pausa, 2-fim
+      id = i
+      // alert(i)
+      if (op == 0) {
+        document.getElementById('h_inicio').click()
+        // alert(i +" <> "+op)
+      } else if (op == 1) {
+        document.getElementById('h_pausa').click()
+
+      } else {
+        document.getElementById('h_fim').click()
+
+      }
+    }
+
+    function dataHojeFormatada() {
+      const hoje = new Date();
+      const dia = String(hoje.getDate()).padStart(2, '0');
+      const mes = String(hoje.getMonth() + 1).padStart(2, '0'); // Janeiro é 0
+      const ano = hoje.getFullYear();
+      return `${dia}-${mes}-${ano}`;
+    }
+  </script>
+</body>
+
+</html>
