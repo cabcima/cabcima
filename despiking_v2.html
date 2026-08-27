@@ -401,7 +401,7 @@
 
     <script>
       const url =
-        "https://script.google.com/macros/s/AKfycbxLAwUHC4qRwxWJmiHGW7zqM6_P70DOiiIHk2ETbmi7bW-PgAZMpu3TxXPUk8smsP8ckA/exec?";
+        "https://script.google.com/macros/s/AKfycbxTBydHcTUPYDBLNIsu7QDErunUTm5BK4TKwTl9dRC3FKelPTkt6l_yf7tH-kJtNuljpQ/exec?";
       var nomes = [];
       var categ = [];
       var mercado = [];
@@ -1154,21 +1154,6 @@
           .map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
           .join(" ");
       }
-
-      /*
-    function adicionarNome() {
-      const nome = document.getElementById("novoNome").value.trim();
-      if (nome && !nomes.includes(nome)) {
-        nomes.push(nome);
-        const select = document.getElementById("nomeSelect");
-        const option = document.createElement("option");
-        option.value = nome;
-        option.textContent = nome;
-        select.appendChild(option);
-        document.getElementById("novoNome").value = "";
-      }
-    }
-*/
 
       function converterParaMinutos(hora) {
         if (hora == 0) {
