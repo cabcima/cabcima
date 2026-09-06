@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Registo de Etiquetagem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EAE1CC;
+    --paper-card:#F8F3E7;
+    --ink:#241F1B;
+    --ink-soft:#6B6152;
+    --stamp:#A6392C;
+    --stamp-dark:#7E2B21;
+    --tag-green:#3E6A4E;
+    --tag-green-dark:#2E5039;
+    --line:#CBBC9C;
+    --warn:#B4801E;
+    --radius:3px;
+  }
+
+  *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,Segoe UI,sans-serif;
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:100px;
+    font-size:16px;
+  }
+  ::selection{background:var(--stamp);color:#fff;}
+
+  h1,h2,h3,.font-display{font-family:'Space Grotesk',system-ui,sans-serif;}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,SFMono-Regular,monospace;}
+
+  .wrap{max-width:640px;margin:0 auto;padding:0 16px;}
+
+  header.top{padding:14px 6px 10px;border-bottom:1px solid var(--line);background:var(--paper);}
+  .tag-mark{width:32px;height:32px;flex:0 0 auto;transform:rotate(-8deg);}
+  .top-row{display:flex;align-items:center;gap:10px;max-width:640px;margin:0 auto;}
+  h1{font-size:20px;font-weight:700;margin:0;letter-spacing:-0.01em;color:var(--ink);}
+  .top-sub{margin:5px 0 0;font-size:13px;color:var(--ink-soft);max-width:640px;margin-left:auto;margin-right:auto;}
+
+  main{padding-top:20px;}
+
+  .card{
+    background:var(--paper-card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:4px 16px;
+    margin-bottom:18px;
+  }
+  .card h2{font-size:14.5px;margin:0 0 8px;font-weight:600;color:var(--ink);}
+
+  .field{margin-bottom:14px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
+  input,select{
+    width:50%;font-family:'Inter',sans-serif;font-size:16px;
+    padding:4px 12px;border:1px solid var(--line);border-radius:var(--radius);
+    background:#fff;color:var(--ink);min-height:30px;
+  }
+  input:focus,select:focus,button:focus-visible{outline:2px solid var(--stamp);outline-offset:1px;}
+  .field-hint{font-size:11.5px;color:var(--ink-soft);margin-top:5px;}
+
+  .time-fields{display:flex;flex-direction:column;gap:14px;}
+  @media (min-width:480px){
+    .time-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  }
+  .time-row{display:flex;gap:8px;}
+  .time-row input{flex:1;min-width:0;}
+  .btn-now{
+    flex:0 0 auto;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;
+    padding:0 14px;border:1px solid var(--ink);background:var(--ink);color:var(--paper-card);
+    border-radius:var(--radius);cursor:pointer;white-space:nowrap;min-height:30px;
+  }
+  .btn-now:active{background:var(--stamp);border-color:var(--stamp);}
+
+  .user-add-row{display:flex;gap:8px;margin-top:8px;}
+  .user-add-row input{flex:1;}
+  .btn-mini{
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13.5px;
+    border:1px solid var(--ink);background:transparent;color:var(--ink);
+    padding:0 14px;border-radius:var(--radius);cursor:pointer;min-height:30px;
+  }
+  .btn-mini:active{background:var(--ink);color:var(--paper-card);}
+
+  .btn-start{
+    width:100%;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;
+    padding:15px;border:none;border-radius:var(--radius);background:var(--stamp);color:#fff;
+    cursor:pointer;min-height:30px;
+  }
+  .btn-start:active{background:var(--stamp-dark);}
+  .btn-start:disabled{background:var(--line);color:var(--ink-soft);cursor:not-allowed;}
+
+  .btn-finish{
+    width:100%;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;
+    padding:12px;border:1px solid var(--ink-soft);border-radius:var(--radius);background:transparent;color:var(--ink-soft);
+    cursor:pointer;margin-top:4px;min-height:30px;
+  }
+  .btn-finish:active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  .computed-time{font-size:13px;color:var(--ink-soft);margin-top:8px;}
+  .computed-time strong{color:var(--ink);font-family:'IBM Plex Mono',monospace;font-weight:500;}
+
+  .session-status{
+    display:flex;align-items:center;gap:8px;
+    font-size:12.5px;color:var(--tag-green-dark);font-weight:600;
+    background:#EAF1EC;border:1px solid #C8DCCD;border-radius:var(--radius);
+    padding:9px 11px;margin-bottom:16px;
+  }
+  .pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--tag-green);flex:0 0 auto;animation:pulse 1.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+  .no-session-note{font-size:13px;color:var(--ink-soft);margin-bottom:14px;}
+
+  .list-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;}
+  .list-head h2{font-size:14.5px;margin:0;font-weight:600;}
+  .count-chip{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--ink);color:var(--paper-card);padding:2px 8px;border-radius:20px;}
+
+  .cat-group{margin-bottom:16px;}
+  .cat-group-head{
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;
+    color:var(--ink);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--line);
+  }
+  .cat-group-head .count-chip{background:transparent;color:var(--ink-soft);border:1px solid var(--line);}
+
+  .ticket{
+    position:relative;background:var(--paper-card);border:1px solid var(--line);
+    border-left:3px dashed var(--ink-soft);border-radius:var(--radius);
+    padding:11px 12px 11px 15px;margin-bottom:8px;
+    display:flex;align-items:flex-start;justify-content:space-between;gap:8px;
+  }
+  .ticket .punch{position:absolute;left:-6px;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:var(--paper);border:1px solid var(--line);}
+  .ticket-main{flex:1;min-width:0;}
+  .ticket-user{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;color:var(--ink);margin-bottom:3px;}
+  .ticket-meta{font-size:12px;color:var(--ink-soft);}
+  .ticket-meta .mono{color:var(--ink);}
+  .ticket-actions{flex:0 0 auto;display:flex;gap:2px;}
+  .ticket-actions button{background:none;border:none;cursor:pointer;color:var(--ink-soft);font-size:17px;line-height:1;}
+  .ticket-actions button:active{color:var(--stamp);}
+
+  .edit-form{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:12px;margin-bottom:8px;}
+  .edit-form .field{margin-bottom:10px;}
+  .edit-actions{display:flex;gap:8px;margin-top:4px;}
+  .edit-actions button{flex:1;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;padding:11px;border-radius:var(--radius);cursor:pointer;border:1px solid var(--ink);min-height:44px;}
+  .btn-save{background:var(--tag-green);color:#fff;border-color:var(--tag-green);}
+  .btn-cancel{background:transparent;color:var(--ink);}
+  .error-msg{font-size:13px;color:var(--stamp);margin-top:8px;display:none;font-weight:500;}
+
+  .empty-state{text-align:center;padding:26px 14px;color:var(--ink-soft);font-size:13px;border:1px dashed var(--line);border-radius:var(--radius);}
+
+  .export-bar{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:var(--paper-card);border-top:1px solid var(--stamp);padding:12px 16px;}
+  .export-inner{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:10px;}
+  .export-info{flex:1;font-size:12px;line-height:1.35;}
+  .export-info strong{font-family:'IBM Plex Mono',monospace;font-weight:500;color:#fff;}
+  .export-actions{display:flex;gap:8px;}
+  .btn-export{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:12.5px;padding:10px 12px;border-radius:var(--radius);border:none;cursor:pointer;min-height:42px;}
+  .btn-export.primary{background:var(--stamp);color:#fff;}
+  .btn-export.ghost{background:transparent;color:var(--paper-card);border:1px solid #5a5248;}
+
+  .toast{
+    position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-10px);
+    background:var(--ink);color:#fff;font-size:13px;font-weight:500;padding:10px 16px;border-radius:var(--radius);
+    opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:50;max-width:88vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-row">
+    <svg class="tag-mark" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M4 4H20L36 20L20 36L4 20V4Z" fill="var(--stamp)"/>
+      <circle cx="12" cy="12" r="3" fill="var(--paper)"/>
+    </svg>
+    <h1>Registo de Etiquetagem</h1>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+
+  <div class="card">
+    <h2>Utilizador</h2>
+    <div class="field">
+      <input type="text" id="r-utilizador">
+      <button type="button" class="btn-mini" id="btn-confirm-user">OK</button>
+    </div>
+    <span id="u_span"></span>
+  </div>
+
+  <div class="card">
+    <h2>Categoria</h2>
+    <div class="field">
+      <label for="r-utilizador">Utilizador</label>
+      <select id="r-utilizador"></select>
+      <div class="user-add-row" id="user-add-row" hidden>
+        <input type="text" id="novo-utilizador" placeholder="Nome do novo utilizador…">
+        <button type="button" class="btn-mini" id="btn-confirm-user">Adicionar</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="r-categoria">Categoria</label>
+      <select id="r-categoria"></select>
+      <p class="field-hint">Mudar de categoria (ou de utilizador) termina e grava a sessão em curso.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Sessão de colocação</h2>
+
+    <div id="sem-sessao" class="no-session-note">Ainda sem sessão em curso.</div>
+    <div id="com-sessao" class="session-status" hidden>
+      <span class="pulse-dot"></span>
+      <span id="session-status-text">Sessão em curso</span>
+    </div>
+
+    <div class="field">
+      <label for="r-inicio">Hora início</label>
+      <div class="time-row">
+        <input type="time" id="r-inicio">
+        <button type="button" class="btn-now" data-target="r-inicio">Agora</button>
+      </div>
+    </div>
+
+    <div id="campos-em-curso" hidden>
+      <div class="field">
+        <label for="r-fim">Hora fim</label>
+        <div class="time-row">
+          <input type="time" id="r-fim">
+          <button type="button" class="btn-now" data-target="r-fim">Agora</button>
+        </div>
+      </div>
+      <p class="computed-time" id="tempo-calculado">Tempo desta sessão: <strong>—</strong></p>
+
+      <div class="field" style="margin-top:14px;">
+        <label for="r-devolvida">Quantidade devolvida</label>
+        <input type="number" id="r-devolvida" min="0" step="1" inputmode="numeric" value="0">
+        <p class="field-hint">Etiquetas desta categoria que sobraram.</p>
+      </div>
+
+      <button type="button" class="btn-finish" id="btn-terminar">Terminar sessão agora</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="list-head">
+      <h2>Registos por categoria</h2>
+      <span class="count-chip" id="chip-registos">0</span>
+    </div>
+    <div id="lista-categorias"></div>
+  </div>
+
+</main>
+</div>
+
+<div class="export-bar">
+  <div class="export-inner">
+    <div class="export-info"><strong id="total-pendentes">0</strong> registo(s) por enviar</div>
+    <div class="export-actions">
+      <button class="btn-export ghost" id="btn-limpar">Limpar</button>
+      <button class="btn-export primary" id="btn-exportar">Exportar JSON</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  const STORAGE_KEY = "etiquetagem_dados_v3";
+  const TICK_MS = 20000; // frequência de verificação do fim automático por tempo
+
+  // Estas listas/tempos devem ser substituídos pelos valores reais fornecidos
+  // (ex: a partir da folha "Categorias" do ficheiro Excel) antes de distribuir
+  // este ficheiro aos operadores. tempoEstimadoMin = tempo estipulado para o
+  // efeito: ao fim desse tempo desde a hora de início, a sessão fecha-se sozinha.
+  const CATEGORIAS = [
+    { nome: "Produtos para Animais", tempoEstimadoMin: 60 },
+    { nome: "Produtos de Beleza", tempoEstimadoMin: 60 }
+  ];
+  const UTILIZADORES_INICIAIS = ["Ana", "Bruno"];
+  const NOVO_UTILIZADOR_VALUE = "__novo__";
+
+  function tempoEstimado(categoria){
+    const c = CATEGORIAS.find(c => c.nome === categoria);
+    return (c ? c.tempoEstimadoMin : 60) * 60000;
+  }
+
+  function loadData(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){ console.warn("Não foi possível ler dados guardados:", e); }
+    return { utilizadores: UTILIZADORES_INICIAIS.slice(), registos: [], sessaoAtual: null };
+  }
+  function saveData(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+  let state = loadData();
+  if(!state.utilizadores || !state.utilizadores.length) state.utilizadores = UTILIZADORES_INICIAIS.slice();
+  if(!state.registos) state.registos = [];
+  if(state.sessaoAtual === undefined) state.sessaoAtual = null;
+
+  // ---------- Data automática (não é campo visível/selecionável) ----------
+  function dataAutomatica(){
+    const agora = new Date();
+    const dia = new Date(agora);
+    if(agora.getHours() >= 20) dia.setDate(dia.getDate() + 1);
+    const y = dia.getFullYear(), m = String(dia.getMonth()+1).padStart(2,"0"), d = String(dia.getDate()).padStart(2,"0");
+    return `${y}-${m}-${d}`;
+  }
+
+  // ---------- Categorias (fixas) ----------
+  const catSelect = document.getElementById("r-categoria");
+  CATEGORIAS.forEach(c=>{
+    const opt = document.createElement("option");
+    opt.value = c.nome; opt.textContent = c.nome;
+    catSelect.appendChild(opt);
+  });
+
+  // ---------- Utilizadores ----------
+  const userSelect = document.getElementById("r-utilizador");
+  function renderUtilizadores(selecionar){
+    userSelect.innerHTML = "";
+    state.utilizadores.forEach(u=>{
+      const opt = document.createElement("option");
+      opt.value = u; opt.textContent = u;
+      userSelect.appendChild(opt);
+    });
+    const optNovo = document.createElement("option");
+    optNovo.value = NOVO_UTILIZADOR_VALUE;
+    optNovo.textContent = "+ Novo utilizador…";
+    userSelect.appendChild(optNovo);
+    if(selecionar && state.utilizadores.includes(selecionar)) userSelect.value = selecionar;
+  }
+  renderUtilizadores();
+
+  const userAddRow = document.getElementById("user-add-row");
+  userSelect.addEventListener("change", ()=>{
+    if(userSelect.value === NOVO_UTILIZADOR_VALUE){
+      userAddRow.hidden = false;
+      document.getElementById("novo-utilizador").focus();
+      return;
+    }
+    userAddRow.hidden = true;
+    handleSelectorChange();
+  });
+  document.getElementById("btn-confirm-user").addEventListener("click", ()=>{
+   enviar_dados("op",["o",document.getElementById("r-utilizador").value]);
+  });
+
+      async function enviar_dados(op, p) {
+        const url="https://script.google.com/macros/s/AKfycbyREkaLD_rna8r0E9O5rhkdkJTu_ehZbcPLTQR4M06uo1u0tqc4qgh7UmogsCHLk_Tb/exec?"
+        console.log(url + "op=" + op + "&"+p[0]+"=" + p[1]);
+         const data = await fetch(url + "op=" + op + "&"+p[0]+"=" + p[1])
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.op === "op") {
+              console.log(data.o.obs);
+              document.getElementById("u_span").textContent=data.o.obs;
+            } 
+          });
+      }
+
+
+
+/*
+  document.getElementById("btn-confirm-user").addEventListener("click", ()=>{
+    const input = document.getElementById("novo-utilizador");
+    const val = input.value.trim();
+    if(!val) return;
+    if(!state.utilizadores.includes(val)) state.utilizadores.push(val);
+    saveData();
+    renderUtilizadores(val);
+    userAddRow.hidden = true;
+    input.value = "";
+    handleSelectorChange();
+  });
+*/
+  catSelect.addEventListener("change", handleSelectorChange);
+
+  function handleSelectorChange(){
+    if(state.sessaoAtual){
+      const mudou = state.sessaoAtual.utilizador !== userSelect.value || state.sessaoAtual.categoria !== catSelect.value;
+      if(mudou) finalizarSessao("mudança de utilizador/categoria");
+    }
+  }
+
+  // ---------- Hora "Agora" ----------
+  function horaAtual(){
+    const d = new Date();
+    return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+  }
+
+  // ---------- Cálculo do tempo (overnight-aware) ----------
+  function calcMinutes(inicio, fim){
+    if(!inicio) return null;
+    if(!fim) {fim=horaAtual()};
+    const [h1,m1] = inicio.split(":").map(Number);
+    const [h2,m2] = fim.split(":").map(Number);
+    let mins = (h2*60+m2) - (h1*60+m1);
+    if(mins < 0) mins += 24*60;
+    return mins;
+  }
+  function formatMins(mins){
+    const h = Math.floor(mins/60), m = mins%60;
+    return h === 0 ? m + " min" : h + "h" + String(m).padStart(2,"0") + "min";
+  }
+
+  // ---------- Elementos da sessão ----------
+  const inicioEl = document.getElementById("r-inicio");
+  const fimEl = document.getElementById("r-fim");
+  const devolvidaEl = document.getElementById("r-devolvida");
+  const semSessaoEl = document.getElementById("sem-sessao");
+  const comSessaoEl = document.getElementById("com-sessao");
+  const statusTextEl = document.getElementById("session-status-text");
+  const camposEmCursoEl = document.getElementById("campos-em-curso");
+  const tempoDisplay = document.getElementById("tempo-calculado").querySelector("strong");
+  let tempoConta=null;
+
+  function atualizarTempoDisplay(){
+ //   alert("sds")
+    const mins = calcMinutes(inicioEl.value, fimEl.value);
+    tempoDisplay.textContent = mins === null ? "—" : formatMins(mins) + " (" + mins + " min)";
+  }
+
+  function iniciarOuAtualizarInicio(valor){
+    if(!valor) return;
+    if(!state.sessaoAtual){
+      state.sessaoAtual = {
+        utilizador: userSelect.value,
+        categoria: catSelect.value,
+        data: dataAutomatica(),
+        horaInicio: valor,
+        horaFim: "",
+        quantidadeDevolvida: 0,
+        inicioTimestamp: Date.now()
+      };
+      showToast("Sessão iniciada.");
+      tempoConta=setInterval(atualizarTempoDisplay,30000);
+    } else {
+      state.sessaoAtual.horaInicio = valor;
+    }
+    saveData();
+    renderSessaoAtual();
+  }
+
+  inicioEl.addEventListener("change", ()=> iniciarOuAtualizarInicio(inicioEl.value));
+  document.querySelector('.btn-now[data-target="r-inicio"]').addEventListener("click", ()=>{
+    inicioEl.value = horaAtual();
+    iniciarOuAtualizarInicio(inicioEl.value);
+  });
+
+  fimEl.addEventListener("change", ()=>{
+    if(!state.sessaoAtual) return;
+    state.sessaoAtual.horaFim = fimEl.value;
+    clearTimeout(tempoConta);
+    saveData();
+    atualizarTempoDisplay();
+  });
+  document.querySelector('.btn-now[data-target="r-fim"]').addEventListener("click", ()=>{
+    if(!state.sessaoAtual) return;
+    fimEl.value = horaAtual();
+    state.sessaoAtual.horaFim = fimEl.value;
+    saveData();
+    atualizarTempoDisplay();
+  });
+
+  devolvidaEl.addEventListener("input", ()=>{
+    if(!state.sessaoAtual) return;
+    const v = parseInt(devolvidaEl.value, 10);
+    state.sessaoAtual.quantidadeDevolvida = isNaN(v) ? 0 : Math.max(0, v);
+    saveData();
+  });
+
+  document.getElementById("btn-terminar").addEventListener("click", ()=>{
+    finalizarSessao("terminado manualmente");
+  });
+
+  function finalizarSessao(motivo){
+    const s = state.sessaoAtual;
+    if(!s) return;
+    if(!s.horaFim) s.horaFim = horaAtual();
+    const tempoMin = calcMinutes(s.horaInicio, s.horaFim);
+    state.registos.push({
+      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
+      data: s.data, utilizador: s.utilizador, categoria: s.categoria,
+      horaInicio: s.horaInicio, horaFim: s.horaFim, tempoMin: tempoMin === null ? 0 : tempoMin,
+      quantidadeDevolvida: s.quantidadeDevolvida || 0,
+      registadoEm: new Date().toISOString()
+    });
+    state.sessaoAtual = null;
+    saveData();
+    showToast("Registo guardado (" + motivo + ").");
+    renderSessaoAtual();
+    renderLista();
+    updateExportBar();
+  }
+
+  function renderSessaoAtual(){
+    const s = state.sessaoAtual;
+    if(!s){
+      semSessaoEl.hidden = false;
+      comSessaoEl.hidden = true;
+      camposEmCursoEl.hidden = true;
+      inicioEl.value = "";
+      fimEl.value = "";
+      devolvidaEl.value = "0";
+      return;
+    }
+    semSessaoEl.hidden = true;
+    comSessaoEl.hidden = false;
+    camposEmCursoEl.hidden = false;
+    inicioEl.value = s.horaInicio || "";
+    fimEl.value = s.horaFim || "";
+    devolvidaEl.value = String(s.quantidadeDevolvida || 0);
+    userSelect.value = s.utilizador;
+    catSelect.value = s.categoria;
+    atualizarTempoDisplay();
+    atualizarBadge();
+  }
+
+  function atualizarBadge(){
+    const s = state.sessaoAtual;
+    if(!s) return;
+    const limiteMs = tempoEstimado(s.categoria);
+    const restanteMs = Math.max(0, limiteMs - (Date.now() - s.inicioTimestamp));
+    const restanteMin = Math.ceil(restanteMs / 60000);
+    statusTextEl.textContent = `Sessão em curso — fecha sozinha dentro de ${restanteMin} min, ou ao mudar de categoria/utilizador.`;
+  }
+
+  // ---------- Verificação periódica do tempo estipulado ----------
+  setInterval(()=>{
+    const s = state.sessaoAtual;
+    if(!s) return;
+    const limiteMs = tempoEstimado(s.categoria);
+    if(Date.now() - s.inicioTimestamp >= limiteMs){
+      finalizarSessao("tempo estipulado atingido");
+    } else {
+      atualizarBadge();
+    }
+  }, TICK_MS);
+
+  // ---------- Listagem agrupada por categoria (histórico) ----------
+  function renderLista(){
+    const container = document.getElementById("lista-categorias");
+    document.getElementById("chip-registos").textContent = state.registos.length;
+
+    if(state.registos.length === 0){
+      container.innerHTML = '<div class="empty-state">Ainda sem registos guardados neste dispositivo.</div>';
+      return;
+    }
+
+    const porCategoria = {};
+    state.registos.forEach(r=>{
+      if(!porCategoria[r.categoria]) porCategoria[r.categoria] = [];
+      porCategoria[r.categoria].push(r);
+    });
+
+    const nomesCat = CATEGORIAS.map(c=>c.nome);
+    const categoriasComRegistos = Object.keys(porCategoria).sort((a,b)=>{
+      const ia = nomesCat.indexOf(a), ib = nomesCat.indexOf(b);
+      if(ia === -1 && ib === -1) return a.localeCompare(b);
+      if(ia === -1) return 1;
+      if(ib === -1) return -1;
+      return ia - ib;
+    });
+
+    container.innerHTML = categoriasComRegistos.map(cat=>{
+      const registos = porCategoria[cat].slice().reverse();
+      const tickets = registos.map(r => renderTicket(r)).join("");
+      return `
+        <div class="cat-group">
+          <div class="cat-group-head">
+            <span>${escapeHtml(cat)}</span>
+            <span class="count-chip">${porCategoria[cat].length}</span>
+          </div>
+          ${tickets}
+        </div>
+      `;
+    }).join("");
+
+    attachTicketHandlers();
+  }
+
+  function renderTicket(r){
+    /*return `
+      <div class="ticket" data-id="${r.id}">
+        <span class="punch"></span>
+        <div class="ticket-main">
+          <div class="ticket-user">${escapeHtml(r.utilizador)}</div>
+          <div class="ticket-meta">${formatDate(r.data)} · <span class="mono">${r.horaInicio}–${r.horaFim}</span> · ${r.tempoMin} min · ${r.quantidadeDevolvida} devolvidas</div>
+        </div>
+        <div class="ticket-actions">
+          <button class="btn-edit" title="Editar" aria-label="Editar registo">✎</button>
+          <button class="btn-del" title="Remover" aria-label="Remover registo">×</button>
+        </div>
+      </div>
+    `;*/ 
+    return `
+      <div class="ticket" data-id="${r.id}">
+        <span class="punch"></span>
+        <div class="ticket-main">
+          <div class="ticket-meta"><span class="mono">${r.horaInicio}–${r.horaFim}</span> · ${r.tempoMin} min · ${r.quantidadeDevolvida} devolvidas</div>
+        </div>
+        <div class="ticket-actions">
+          <button class="btn-edit" title="Editar" aria-label="Editar registo">✎</button>
+          <button class="btn-del" title="Remover" aria-label="Remover registo">×</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderEditForm(r){
+    const userOptions = state.utilizadores.map(u=>
+      `<option value="${escapeHtml(u)}" ${u===r.utilizador?"selected":""}>${escapeHtml(u)}</option>`
+    ).join("");
+    const catOptions = CATEGORIAS.map(c=>
+      `<option value="${escapeHtml(c.nome)}" ${c.nome===r.categoria?"selected":""}>${escapeHtml(c.nome)}</option>`
+    ).join("");
+    return `
+      <div class="edit-form" data-id="${r.id}">
+        <div class="field">
+          <label>Utilizador</label>
+          <select class="e-utilizador">${userOptions}</select>
+        </div>
+        <div class="field">
+          <label>Categoria</label>
+          <select class="e-categoria">${catOptions}</select>
+        </div>
+        <div class="field">
+          <label>Hora início</label>
+          <div class="time-row">
+            <input type="time" class="e-inicio" value="${r.horaInicio}">
+            <button type="button" class="btn-now e-now" data-target="inicio">Agora</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Hora fim</label>
+          <div class="time-row">
+            <input type="time" class="e-fim" value="${r.horaFim}">
+            <button type="button" class="btn-now e-now" data-target="fim">Agora</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Quantidade devolvida</label>
+          <input type="number" class="e-devolvida" min="0" step="1" inputmode="numeric" value="${r.quantidadeDevolvida}">
+        </div>
+        <p class="error-msg e-erro"></p>
+        <div class="edit-actions">
+          <button type="button" class="btn-cancel">Cancelar</button>
+          <button type="button" class="btn-save">Guardar</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function attachTicketHandlers(){
+    document.querySelectorAll(".btn-del").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const id = btn.closest(".ticket").dataset.id;
+        state.registos = state.registos.filter(r => r.id !== id);
+        saveData();
+        renderLista();
+        updateExportBar();
+      });
+    });
+
+    document.querySelectorAll(".btn-edit").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const ticket = btn.closest(".ticket");
+        const id = ticket.dataset.id;
+        const registo = state.registos.find(r => r.id === id);
+        if(!registo) return;
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = renderEditForm(registo);
+        const form = wrapper.firstElementChild;
+        ticket.replaceWith(form);
+        attachEditFormHandlers(form, registo);
+      });
+    });
+  }
+
+  function attachEditFormHandlers(form, registo){
+    form.querySelectorAll(".e-now").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const field = btn.dataset.target === "inicio" ? ".e-inicio" : ".e-fim";
+        form.querySelector(field).value = horaAtual();
+      });
+    });
+    form.querySelector(".btn-cancel").addEventListener("click", renderLista);
+    form.querySelector(".btn-save").addEventListener("click", ()=>{
+      const erro = form.querySelector(".e-erro");
+      erro.style.display = "none";
+
+      const utilizador = form.querySelector(".e-utilizador").value;
+      const categoria = form.querySelector(".e-categoria").value;
+      const inicio = form.querySelector(".e-inicio").value;
+      const fim = form.querySelector(".e-fim").value;
+      const devolvida = parseInt(form.querySelector(".e-devolvida").value, 10);
+
+      if(!utilizador || !categoria || !inicio || !fim || isNaN(devolvida) || devolvida < 0){
+        erro.textContent = "Preenche todos os campos.";
+        erro.style.display = "block";
+        return;
+      }
+      const tempoMin = calcMinutes(inicio, fim);
+      if(tempoMin === 0){
+        erro.textContent = "A hora de início e a hora de fim não podem ser iguais.";
+        erro.style.display = "block";
+        return;
+      }
+
+      registo.utilizador = utilizador;
+      registo.categoria = categoria;
+      registo.horaInicio = inicio;
+      registo.horaFim = fim;
+      registo.tempoMin = tempoMin;
+      registo.quantidadeDevolvida = devolvida;
+
+      saveData();
+      showToast("Registo atualizado.");
+      renderLista();
+      updateExportBar();
+    });
+  }
+
+  function formatDate(iso){ const [y,m,d] = iso.split("-"); return `${d}/${m}/${y}`; }
+  function escapeHtml(str){ const div = document.createElement("div"); div.textContent = str; return div.innerHTML; }
+
+  // ---------- Export bar ----------
+  function updateExportBar(){
+    document.getElementById("total-pendentes").textContent = state.registos.length;
+  }
+
+  document.getElementById("btn-exportar").addEventListener("click", ()=>{
+    if(state.registos.length === 0){ showToast("Não há registos para exportar."); return; }
+    const payload = {
+      exportadoEm: new Date().toISOString(),
+      registos: state.registos.map(({id, registadoEm, ...rest}) => rest)
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const stamp = new Date().toISOString().replace(/[:T]/g,"-").slice(0,16);
+    a.href = url;
+    a.download = `etiquetas-registos-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast("Ficheiro JSON exportado.");
+  });
+
+  document.getElementById("btn-limpar").addEventListener("click", ()=>{
+    if(state.registos.length === 0){ showToast("Não há registos para limpar."); return; }
+    const ok = confirm(`Confirmas que já enviaste o ficheiro exportado? Isto vai apagar ${state.registos.length} registo(s) guardado(s) neste dispositivo.`);
+    if(!ok) return;
+    state.registos = [];
+    saveData();
+    renderLista();
+    updateExportBar();
+    showToast("Registos limpos.");
+  });
+
+  // ---------- Toast ----------
+  let toastTimer;
+  function showToast(msg){
+    const toast = document.getElementById("toast");
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>toast.classList.remove("show"), 2200);
+  }
+
+  // ---------- Init ----------
+  renderSessaoAtual();
+  renderLista();
+  updateExportBar();
+})();
+</script>
+
+</body>
+</html>
